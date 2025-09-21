@@ -1,0 +1,18 @@
+<!doctype html>
+<html>
+  <body>
+    <h1>Måltids-MVP</h1>
+    <form action="/search" method="get">
+      <label>Type måltid:</label>
+      <select name="meal_type">
+        <option>Dinner</option>
+        <option>Lunch</option>
+      </select>
+      <label>Vegetar:</label>
+      <input type="checkbox" name="vegetarian" value="true">
+      <label>Porsjoner:</label>
+      <input type="number" name="servings" value="2" min="1" max="8">
+      <button type="submit">Søk</button>
+    </form>
+  </body>
+</html>

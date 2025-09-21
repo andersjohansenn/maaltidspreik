@@ -1,0 +1,25 @@
+<!doctype html>
+<html>
+  <body>
+    <a href="/">← Tilbake</a>
+    <h2>Resultater</h2>
+    {% if meals %}
+      <ul>
+        {% for m in meals %}
+          <li style="margin-bottom:1rem;">
+            <img src="{{ m.thumb }}" alt="" width="90">
+            <div><strong>{{ m.title }}</strong></div>
+            <div>Ingredienser ({{ m.ingredient_count }}), porsjoner: {{ servings }}</div>
+            <ul>
+              {% for ing in m.ingredients_scaled %}
+                <li>{{ ing.qty }} {{ ing.name }}</li>
+              {% endfor %}
+            </ul>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p>Ingen treff – prøv å endre filter.</p>
+    {% endif %}
+  </body>
+</html>
