@@ -23,16 +23,20 @@ export async function fetchTags({ category, area, query } = {}) {
   return (await r.json()).tags || [];
 }
 
-export async function fetchMeals({ category, area, query, tag } = {}) {
+export async function fetchMeals({ category, area, query, tag, page = 1, limit = 10 } = {}) {
   const p = new URLSearchParams();
   if (category) p.set("category", category);
   if (area) p.set("area", area);
   if (query) p.set("q", query);
   if (tag) p.set("tag", tag);
+  p.set("page", String(page));
+  p.set("limit", String(limit));
+
   const r = await fetch(`${BASE}/meals?${p.toString()}`);
-  if (!r.ok) throw new Error("meals failed");
-  return (await r.json()).meals || [];
+  if (!r.ok) throw new Error(`meals failed: ${r.status}`);
+  return await r.json(); // { meals, page, limit, total, has_prev, has_next }
 }
+
 
 export async function fetchMealById(id) {
   const r = await fetch(`${BASE}/meal?id=${encodeURIComponent(id)}`);
