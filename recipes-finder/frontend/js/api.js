@@ -1,5 +1,27 @@
-// api.js — use ONLY the Hugging Face backend
+// js/api.js
 const BASE = "https://andersjohansenn-maaltidspreik.hf.space"; // no trailing slash
+
+export async function fetchCategories() {
+  const r = await fetch(`${BASE}/categories`);
+  if (!r.ok) throw new Error("categories failed");
+  return (await r.json()).categories || [];
+}
+
+export async function fetchAreas() {
+  const r = await fetch(`${BASE}/areas`);
+  if (!r.ok) throw new Error("areas failed");
+  return (await r.json()).areas || [];
+}
+
+export async function fetchTags({ category, area, query } = {}) {
+  const p = new URLSearchParams();
+  if (category) p.set("category", category);
+  if (area) p.set("area", area);
+  if (query) p.set("q", query);
+  const r = await fetch(`${BASE}/tags?${p.toString()}`);
+  if (!r.ok) throw new Error("tags failed");
+  return (await r.json()).tags || [];
+}
 
 export async function fetchMeals({ category, area, query, tag } = {}) {
   const p = new URLSearchParams();
@@ -7,36 +29,13 @@ export async function fetchMeals({ category, area, query, tag } = {}) {
   if (area) p.set("area", area);
   if (query) p.set("q", query);
   if (tag) p.set("tag", tag);
-
   const r = await fetch(`${BASE}/meals?${p.toString()}`);
-  if (!r.ok) throw new Error(`Backend error: ${r.status}`);
-  const data = await r.json();
-  return data.meals || [];
+  if (!r.ok) throw new Error("meals failed");
+  return (await r.json()).meals || [];
 }
 
-export async function fetchCategories() {
-  const r = await fetch(`${BASE}/categories`);
-  if (!r.ok) throw new Error(`Backend error: ${r.status}`);
-  const data = await r.json();
-  return data.categories || [];
-}
-
-export async function fetchAreas() {
-  const r = await fetch(`${BASE}/areas`);
-  if (!r.ok) throw new Error(`Backend error: ${r.status}`);
-  const data = await r.json();
-  return data.areas || [];
-}
-
-// Optional: if you want tags from backend instead of deriving in the client
-export async function fetchTags({ category, area, query } = {}) {
-  const p = new URLSearchParams();
-  if (category) p.set("category", category);
-  if (area) p.set("area", area);
-  if (query) p.set("q", query);
-
-  const r = await fetch(`${BASE}/tags?${p.toString()}`);
-  if (!r.ok) throw new Error(`Backend error: ${r.status}`);
-  const data = await r.json();
-  return data.tags || [];
+export async function fetchMealById(id) {
+  const r = await fetch(`${BASE}/meal?id=${encodeURIComponent(id)}`);
+  if (!r.ok) throw new Error("meal failed");
+  return (await r.json()).meal || null;
 }
