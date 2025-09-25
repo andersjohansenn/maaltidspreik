@@ -1,14 +1,41 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Recipes Finder</title>
-    <link rel="stylesheet" href="css/styles.css" />
-  </head>
-  <body>
-    <h1>Recipes Finder Frontend Placeholder</h1>
-    <script src="js/api.js"></script>
-    <script src="js/app.js"></script>
-  </body>
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Recipes Finder</title>
+  <link rel="stylesheet" href="css/styles.css"/>
+  <style>
+    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1rem;list-style:none;padding:0}
+    .card{border:1px solid #eee;border-radius:12px;overflow:hidden;background:#fff}
+    .card img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block}
+    .meta{padding:.5rem .75rem .75rem}
+    .filters{display:flex;flex-wrap:wrap;gap:.5rem;margin:.75rem 0}
+    .filters label{font-size:.9rem}
+  </style>
+</head>
+<body>
+  <h1>Recipes Finder</h1>
+
+  <form id="filters-form" class="filters">
+    <label>Category
+      <select id="filter-category"><option value="">All</option></select>
+    </label>
+    <label>Area
+      <select id="filter-area"><option value="">All</option></select>
+    </label>
+    <label>Tags
+      <select id="filter-tags"><option value="">All</option></select>
+    </label>
+    <label>Search
+      <input id="filter-query" placeholder="e.g. pasta"/>
+    </label>
+    <button type="submit">Search</button>
+    <button type="button" id="clear-filters">Clear</button>
+  </form>
+
+  <ul id="meal-list" class="grid"></ul>
+
+  <script type="module" src="js/app-index.js"></script>
+</body>
 </html>
