@@ -10,8 +10,6 @@ body {
 
 h1{
   font-family: 'Playfair Display', serif;
-  margin: 0.5rem 0;
-  padding-left: 30%;
 }
 
 label {
@@ -27,9 +25,40 @@ button{
   text-decoration: none;
   display: inline-block;
   font-size: 16px;
-  margin: 60px 20px;
   padding-left: 5%;
   padding-right: 5%;
   cursor: pointer;
   border-radius: 12px;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+.header{
+  background-color: #d2886a;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding: 5%;
+  padding-left: 10%;
+  width: 85%;
+  border-radius: 12px;
+  text-align: center;
+}
+
+.buttons {
+  display: flex;
+  gap: 10%;
+  padding-left: 30%;
+  margin-top: 30px;
+}
+
+.buttons button {
+  width: 150px;
+}
+
+.buttons button:hover {
+  background-color: #d9775b;
 }
