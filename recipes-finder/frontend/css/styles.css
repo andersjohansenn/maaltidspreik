@@ -70,6 +70,7 @@ button{
   text-align: left;
 }
 
+
 .filter-group label {
   font-weight: 600;
   font-size: 0.9rem;
@@ -86,12 +87,7 @@ button{
   transition: all 0.2s;
   width: 200px;
 }
-.filter-group select:focus,
-.filter-group input:focus {
-  border-color: #2ecc71;
-  box-shadow: 0 0 0 3px rgba(46, 204, 113, 0.2);
-  outline: none;
-}
+
 
 .buttons {
   display: flex;
