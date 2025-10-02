@@ -18,6 +18,9 @@ h1{
 label {
   padding: 2%;
 }
+input {
+  border-radius: 5px;
+}
 
 button{
   background-color: #EFAF8D;
@@ -81,8 +84,8 @@ button{
   border-radius: 10px;
   font-size: 1rem;
   transition: all 0.2s;
+  width: 200px;
 }
-
 .filter-group select:focus,
 .filter-group input:focus {
   border-color: #2ecc71;
