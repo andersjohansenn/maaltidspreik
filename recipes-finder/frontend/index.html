@@ -11,7 +11,7 @@
     .card img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block}
     .meta{padding:.5rem .75rem .75rem}
     .filters{display:flex;flex-wrap:wrap;gap:.5rem;margin:.75rem 0}
-    .filters label{font-size:.9rem}
+    .filters label{font-size:1.3rem}
   </style>
 </head>
 <body>
@@ -20,18 +20,22 @@
   <h1>Recipes Finder</h1>
 
   <form id="filters-form" class="filters">
+    <div class="filter_group">
     <label>Category
       <select id="filter-category"><option value="">All</option></select>
-    </label>
+    </label></div>
+    <div class="filter_group">
     <label>Area
       <select id="filter-area"><option value="">All</option></select>
-    </label>
+    </label></div>
+    <div class="filter_group">
     <label>Tags
       <select id="filter-tags"><option value="">All</option></select>
-    </label>
+    </label></div>
+    <div class="filter_group">
     <label>Search
       <input id="filter-query" placeholder="e.g. pasta"/>
-    </label>
+    </label></div>
     <br><br>
     <div class="buttons">
     <button type="submit">Search</button>
