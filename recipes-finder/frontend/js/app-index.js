@@ -66,7 +66,9 @@ function syncUrl() {
   if (els.area.value) p.set("area", els.area.value);
   if (els.tags.value) p.set("tag", els.tags.value);
   if (els.query.value) p.set("q", els.query.value);
-  history.replaceState(null, "", "?" + p.toString());
+  const queryString = p.toString();
+  const newUrl = queryString ? `${location.pathname}?${queryString}` : location.pathname;
+  history.replaceState(null, "", newUrl);
 }
 
 // Load one page and append
@@ -109,6 +111,9 @@ async function refreshFirstPage() {
   state.page = 1;
   state.accum = [];
   state.hasNext = false;
+  els.list.innerHTML = `<li>Loading…</li>`;
+
+  const selectedTag = els.tags.value;
 
   // Rebuild tags for the current filter context
   try {
@@ -117,7 +122,11 @@ async function refreshFirstPage() {
       area: els.area.value || undefined,
       query: els.query.value || undefined,
     });
-    els.tags.innerHTML = `<option value="">All</option>` + t.map(x => `<option>${x}</option>`).join("");
+    const options = `<option value="">All</option>` + t.map(x => `<option>${x}</option>`).join("");
+    els.tags.innerHTML = options;
+    if (selectedTag && t.includes(selectedTag)) {
+      els.tags.value = selectedTag;
+    }
   } catch {
     // If /tags fails, we’ll just leave current tags (or you can clear it)
   }
@@ -139,18 +148,21 @@ els.loadMore.addEventListener("click", () => {
   if (state.hasNext) loadPage(state.page + 1);
 });
 
-// Debounce search
-let t;
-els.query.addEventListener("input", () => { clearTimeout(t); t = setTimeout(refreshFirstPage, 300); });
-
 // Boot
 (async function boot() {
   readUrl();
+  els.list.innerHTML = `<li>Loading…</li>`;
   // init categories/areas once
   try {
     const [cats, areas] = await Promise.all([fetchCategories(), fetchAreas()]);
-    document.querySelector("#filter-category").innerHTML = `<option value="">All</option>` + cats.map(c => `<option>${c}</option>`).join("");
-    document.querySelector("#filter-area").innerHTML = `<option value="">All</option>` + areas.map(a => `<option>${a}</option>`).join("");
+    const categorySelect = document.querySelector("#filter-category");
+    const areaSelect = document.querySelector("#filter-area");
+    const prevCategory = els.category.value;
+    const prevArea = els.area.value;
+    categorySelect.innerHTML = `<option value="">All</option>` + cats.map(c => `<option>${c}</option>`).join("");
+    areaSelect.innerHTML = `<option value="">All</option>` + areas.map(a => `<option>${a}</option>`).join("");
+    if (prevCategory) categorySelect.value = prevCategory;
+    if (prevArea) areaSelect.value = prevArea;
   } catch {}
   await refreshFirstPage();
 })();
