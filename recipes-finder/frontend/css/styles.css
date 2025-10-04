@@ -81,10 +81,9 @@ select {
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
-  background: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%204%205%22%3E%3Cpath%20fill%3D%22none%22%20stroke%3D%22%23333%22%20stroke-width%3D%221.5%22%20d%3D%22M0.5%201.5l1.5%201.5l1.5-1.5%22%2F%3E%3C%2Fsvg%3E') no-repeat right 0.7rem center;
-  background-size: 0.65rem auto;
+  background:white;
   border: 1px solid #43270F;
-  border-radius: 10px;
+  border-radius: 8px;
   font-size: 1rem;
   transition: all 0.2s;
   width: 150px;
