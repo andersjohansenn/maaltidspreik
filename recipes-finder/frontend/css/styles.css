@@ -1,11 +1,14 @@
 /* Placeholder styles for the Recipes Finder frontend. */
+:root {
+  color-scheme: light dark;
+}
 
 body {
   font-family: 'Poppins', sans-serif;
-  background: #fdf6f0;
+  background: light-dark(#fdf6f0,  #121212);
   margin: 0;
   padding: 2rem;
-  color: #43270F;
+  color: light-dark(#43270F, #F5F5F5);  ;
   line-height: 1.6;
 }
 
@@ -23,7 +26,7 @@ input {
 }
 
 button{
-  background-color: #EFAF8D;
+  background-color: light-dark(#EFAF8D, #FF7B00);
   border: none;
   color: white;
   padding: 10px 20px;
@@ -44,7 +47,7 @@ button{
 }
 
 .header{
-  background-color: #d2886a;
+  background-color: light-dark(#d2886a, #242424);
   align-items: center;
   margin-bottom: 2rem;
   padding: 5%;
@@ -74,7 +77,7 @@ button{
 .filter-group label {
   font-weight: 600;
   font-size: 0.9rem;
-  color: #2c3e50;
+  color: light-dark (#2c3e50, #ecf0f1);
   margin-bottom: 0.3rem;
 }
 select {
@@ -102,5 +105,5 @@ select {
 }
 
 .buttons button:hover {
-  background-color: #d9775b;
+  background-color: light-dark(#d9775b, #FFA34D);
 }
