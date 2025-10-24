@@ -6,11 +6,13 @@
   <title>Recipe</title>
   <link rel="stylesheet" href="css/styles.css"/>
   <style>
+    header{background-color: light-dark(#fdf6f0,  #121212); text-align: center;padding-bottom: 3px;}
+    header h1{font-size: 4rem;}
     .wrap{max-width:900px;margin:0 auto;padding:1rem}
     .hero{display:grid;grid-template-columns:280px 1fr;gap:1rem;align-items:start}
     .hero img{width:100%;border-radius:12px;display:block}
-    #content {display: block; margin-top: 1rem;background-color:light-dark( #fdf6f0,#242424); padding: 3%; border-radius: 12px;box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;}
-    table{border-collapse:collapse;width:100%;border: 2px solid light-dark(#43270F,#eee);}
+    #content {display: block; margin-top: 1rem;background-color:light-dark( #d2886a,#242424); padding: 3%; border-radius: 12px;box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;}
+    table{border-collapse:collapse;width:100%;border: 2px solid light-dark(#43270F,#eee); background-color:light-dark(#fdf6f0,#353535);}
     td,th{border:1px solid #eee;padding:.5rem .6rem;border: 2px solid light-dark(#43270F,#eee);}
     h1,h2{margin:.6rem 0}
   </style>
@@ -18,6 +20,11 @@
 <body>
   <div class="wrap">
     <a href="index.html">← Back</a>
+    <header>    
+      
+      <h1>Recipes Finder</h1>
+    
+    </header>
     <div id="content">Loading…</div>
   </div>
   <script type="module" src="js/app-recipe.js"></script>
