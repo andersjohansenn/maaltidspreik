@@ -166,3 +166,32 @@ els.loadMore.addEventListener("click", () => {
   } catch {}
   await refreshFirstPage();
 })();
+
+const htmlRoot = document.documentElement;
+const lightBtn = document.getElementById("lightBtn");
+const darkBtn = document.getElementById("darkBtn");
+
+window.switchLight = function () {
+  htmlRoot.removeAttribute("data-theme");
+  localStorage.setItem("theme", "light");
+  lightBtn.classList.add("active");
+  darkBtn.classList.remove("active");
+};
+
+window.switchDark = function () {
+  htmlRoot.setAttribute("data-theme", "dark");
+  localStorage.setItem("theme", "dark");
+  darkBtn.classList.add("active");
+  lightBtn.classList.remove("active");
+};
+
+// Load saved theme on page load
+const savedTheme = localStorage.getItem("theme");
+if (savedTheme === "dark") {
+  htmlRoot.setAttribute("data-theme", "dark");
+  darkBtn.classList.add("active");
+} else {
+  lightBtn.classList.add("active");
+};
+
+
