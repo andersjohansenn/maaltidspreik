@@ -5,8 +5,9 @@
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>Recipe</title>
   <link rel="stylesheet" href="css/styles.css"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
-    header{background-color: light-dark(#fdf6f0,  #121212); text-align: center;padding-bottom: 3px;}
+    header{background-color: #fdf6f0; text-align: center;padding-bottom: 3px;}
     header h1{font-size: 4rem;}
     .wrap{max-width:900px;margin:0 auto;padding:1rem}
     .hero{display:grid;grid-template-columns:280px 1fr;gap:1rem;align-items:start}
@@ -15,13 +16,25 @@
     table{border-collapse:collapse;width:100%;border: 2px solid light-dark(#43270F,#eee); background-color:light-dark(#fdf6f0,#353535);}
     td,th{border:1px solid #eee;padding:.5rem .6rem;border: 2px solid light-dark(#43270F,#eee);}
     h1,h2{margin:.6rem 0}
+    html[data-theme="dark"] {
+      header{background-color: #121212;}
+      #content {background-color:#242424;}
+      table{border: 2px solid #eee; background-color:#353535;}
+      td,th{border: 2px solid #eee;}
+    }
   </style>
 </head>
 <body>
   <div class="wrap">
     <a href="index.html">← Back</a>
-    <header>    
-      
+    
+      <div class="light-dark">  
+      <button id="lightBtn" onclick="switchLight()" aria-label="Light mode"><i class="fa-solid fa-sun"></i></button>
+      <button id="darkBtn" onclick="switchDark()" aria-label="Dark mode">
+    <i class="fa-solid fa-moon"></i>
+      </div>
+  </button>
+  <header>    
       <h1>Recipes Finder</h1>
     
     </header>
