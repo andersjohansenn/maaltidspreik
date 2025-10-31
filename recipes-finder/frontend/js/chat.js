@@ -2,11 +2,20 @@
 import { pipeline, env } from "https://cdn.jsdelivr.net/npm/@xenova/transformers@2.15.1?module";
 import { loadEmbeddings, topK, buildPrompt } from "./rag.js";
 
-// Force remote loading from the Hugging Face Hub and never probe /models on your domain
-env.allowLocalModels = false;
+/* ---- ONNX runtime stability knobs ----
+   We disable SIMD + multithreading and pin the wasm path to the non-SIMD build.
+   This avoids the "RangeError: offset is out of bounds" seen on some setups.
+*/
+env.allowLocalModels = false;        // don't probe /models on your domain
 env.remoteModels = true;
-// Optional: you can pin ORT WASM location if needed
-// env.backends.onnx.wasm.wasmPaths = "https://cdn.jsdelivr.net/npm/onnxruntime-web@1.18.0/dist/";
+
+// Force non-SIMD, single-thread runtime
+env.backends ??= {};
+env.backends.onnx ??= { wasm: {} };
+env.backends.onnx.wasm.simd = false;
+env.backends.onnx.wasm.numThreads = 1;
+// Make sure we load the non-SIMD .wasm
+env.backends.onnx.wasm.wasmPaths = "https://cdn.jsdelivr.net/npm/onnxruntime-web@1.18.0/dist/"; // will pick ort-wasm.wasm
 
 const stream = document.getElementById("stream");
 const form = document.getElementById("ask");
@@ -33,13 +42,16 @@ async function init() {
   // Load RAG data
   ({ meta, embs, dim } = await loadEmbeddings());
 
-  // --- Embedder: use NON-quantized + explicit truncation to avoid wasm offset issues ---
-  // (Quantized sometimes triggers RangeError: offset is out of bounds on some browsers)
-  embedder = await pipeline("feature-extraction", "Xenova/all-MiniLM-L6-v2", {
-    quantized: false,          // <-- key change
+  // --- Embedder: NON-quantized, alternate MiniLM (L12) ---
+  // L12 tends to be more stable in-browser than L6 on some machines.
+  embedder = await pipeline("feature-extraction", "Xenova/all-MiniLM-L12-v2", {
+    quantized: false,
   });
 
-  // Generator: keep quantized (faster); use a public, ungated model
+  // Pre-warm with a tiny input to allocate buffers in a controlled way
+  try { await embedder("hi", { pooling: "mean", normalize: true, truncation: true, max_length: 16 }); } catch {}
+
+  // Generator: keep quantized (public model)
   generator = await pipeline("text-generation", "Xenova/TinyLlama-1.1B-Chat-v1.0", {
     quantized: true,
   });
@@ -51,21 +63,23 @@ async function init() {
 }
 
 async function embedQuery(text) {
-  // Defensive: short-circuit absurdly long user input
-  const safe = (text || "").slice(0, 1000);
+  const safe = (text || "").slice(0, 600); // keep short for stability
+  const baseOpts = { pooling: "mean", normalize: true, truncation: true };
 
-  // Try with conservative token limits (helps ORT stability)
-  const opts = { pooling: "mean", normalize: true, truncation: true, max_length: 128 };
+  // Try progressively smaller token budgets
+  const tries = [64, 48, 32];
 
-  try {
-    const out = await embedder(safe, opts);
-    return new Float32Array(out.data); // 384-d vector
-  } catch (err) {
-    console.warn("Embedder failed (first attempt). Retrying with smaller max_length…", err);
-    // Retry with even smaller context and non-quantized already set
-    const out = await embedder(safe.slice(0, 300), { ...opts, max_length: 64 });
-    return new Float32Array(out.data);
+  let lastErr;
+  for (const ml of tries) {
+    try {
+      const out = await embedder(safe, { ...baseOpts, max_length: ml });
+      return new Float32Array(out.data); // 384-d vector for MiniLM
+    } catch (err) {
+      lastErr = err;
+      console.warn(`Embedder failed at max_length=${ml}.`, err);
+    }
   }
+  throw lastErr || new Error("Embedding failed");
 }
 
 function selectChunks(top) {
