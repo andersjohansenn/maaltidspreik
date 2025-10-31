@@ -8,15 +8,6 @@ async function waitForTransformers(maxMs = 10000) {
   }
 }
 
-
-async function waitForTransformers(maxMs = 10000) {
-  const start = performance.now();
-  while (!window.transformers) {
-    if (performance.now() - start > maxMs) throw new Error("Transformers.js failed to load");
-    await new Promise(r => setTimeout(r, 50));
-  }
-}
-
 const stream = document.getElementById("stream");
 const form = document.getElementById("ask");
 const qInput = document.getElementById("q");
