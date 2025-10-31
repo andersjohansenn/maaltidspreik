@@ -1,4 +1,3 @@
-// js/rag.js
 export async function loadEmbeddings() {
   const [metaRes, embRes] = await Promise.all([
     fetch("./data/chunks.json"),

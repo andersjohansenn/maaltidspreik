@@ -16,19 +16,28 @@ const statusEl = document.getElementById("status");
 
 let embedder, generator, meta, embs, dim;
 
-function addMsg(text, who="bot", sources=[]) { /* unchanged */ }
+function addMsg(text, who="bot", sources=[]) {
+  const div = document.createElement("div");
+  div.className = `msg ${who==="user" ? "msg-user" : "msg-bot"}`;
+  div.innerHTML = `<div>${text}</div>` +
+    (sources.length ? `<div class="sources mt-2">${
+      sources.map(s => `<small>• <a href="${s.url}" target="_blank">${s.title}</a></small>`).join("")
+    }</div>` : "");
+  stream.appendChild(div);
+  stream.scrollTop = stream.scrollHeight;
+}
 
 async function init() {
   addMsg("👋 Hi! Ask me for meal ideas, ingredients, or cooking tips from our recipe set.");
 
-  // 1) Ensure transformers is ready
+  // Ensure the UMD build has initialized window.transformers
   await waitForTransformers();
   const { pipeline } = window.transformers;
 
-  // 2) Load embeddings
+  // Load RAG data
   ({ meta, embs, dim } = await loadEmbeddings());
 
-  // 3) Pipelines
+  // Pipelines (embedding + small instruct model)
   embedder = await pipeline("feature-extraction", "Xenova/all-MiniLM-L6-v2", { quantized: true });
   generator = await pipeline("text-generation", "Xenova/Qwen2.5-0.5B-Instruct", { quantized: true });
 
@@ -37,7 +46,6 @@ async function init() {
 
   statusEl.textContent = "Ready.";
 }
-
 
 async function embedQuery(text) {
   const out = await embedder(text, { pooling: "mean", normalize: true });
@@ -74,7 +82,6 @@ async function answer(question, lucky=false) {
   const text = (Array.isArray(out) ? out[0].generated_text : out.generated_text) || "";
   const reply = text.includes("ASSISTANT:") ? text.split("ASSISTANT:").pop().trim() : text.trim();
 
-  // unique sources (first 3)
   const uniq = [];
   for (const p of picked) if (!uniq.find(u => u.url === p.url)) uniq.push({ title: p.title, url: p.url });
 
