@@ -1,12 +1,8 @@
-import { loadEmbeddings, topK, buildPrompt } from "./rag.js";
+// Import the ESM build of Transformers directly in the module.
+// Using esm.sh avoids ORB/UMD issues in some browsers/CDNs.
+import { pipeline } from "https://esm.sh/@xenova/transformers@2.15.1";
 
-async function waitForTransformers(maxMs = 10000) {
-  const start = performance.now();
-  while (!window.transformers) {
-    if (performance.now() - start > maxMs) throw new Error("Transformers.js failed to load");
-    await new Promise(r => setTimeout(r, 50));
-  }
-}
+import { loadEmbeddings, topK, buildPrompt } from "./rag.js";
 
 const stream = document.getElementById("stream");
 const form = document.getElementById("ask");
@@ -29,10 +25,6 @@ function addMsg(text, who="bot", sources=[]) {
 
 async function init() {
   addMsg("👋 Hi! Ask me for meal ideas, ingredients, or cooking tips from our recipe set.");
-
-  // Ensure the UMD build has initialized window.transformers
-  await waitForTransformers();
-  const { pipeline } = window.transformers;
 
   // Load RAG data
   ({ meta, embs, dim } = await loadEmbeddings());
