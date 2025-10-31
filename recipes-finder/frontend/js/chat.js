@@ -1,12 +1,11 @@
-// Use the official ESM build from jsDelivr (avoid esm.sh/UMD issues).
+// Browser-native ESM build (no UMD, no esm.sh)
 import { pipeline, env } from "https://cdn.jsdelivr.net/npm/@xenova/transformers@2.15.1?module";
-
 import { loadEmbeddings, topK, buildPrompt } from "./rag.js";
 
-// --- IMPORTANT: avoid probing local /models, and ensure remote fetch from HF ---
-env.allowLocalModels = false;       // don't look at https://<yourdomain>/models/...
-env.remoteModels = true;            // always fetch from Hugging Face Hub
-// (Optional) pin ONNX WASM to CDN (usually auto-resolves fine):
+// Force remote loading from the Hugging Face Hub and never probe /models on your domain
+env.allowLocalModels = false;
+env.remoteModels = true;
+// Optional (usually auto-detected):
 // env.backends.onnx.wasm.wasmPaths = "https://cdn.jsdelivr.net/npm/onnxruntime-web@1.18.0/dist/";
 
 const stream = document.getElementById("stream");
@@ -34,14 +33,12 @@ async function init() {
   // Load RAG data
   ({ meta, embs, dim } = await loadEmbeddings());
 
-  // Embedding model (public, ungated)
+  // Embedding model (public)
   embedder = await pipeline("feature-extraction", "Xenova/all-MiniLM-L6-v2", { quantized: true });
 
-  // Generator model: switch to an ungated public instruct model.
-  // Options tested with transformers.js in-browser:
-  //  - "Xenova/Qwen2-0.5B-Instruct"  (public)
-  //  - "Xenova/TinyLlama-1.1B-Chat-v1.0" (public, slightly larger)
-  generator = await pipeline("text-generation", "Xenova/Qwen2-0.5B-Instruct", { quantized: true });
+  // ✅ PUBLIC generator model (instruction-tuned, browser-ready)
+  // Was: "Xenova/Qwen2-0.5B-Instruct" -> caused 401 (gated)
+  generator = await pipeline("text-generation", "Xenova/TinyLlama-1.1B-Chat-v1.0", { quantized: true });
 
   if (typeof embedder !== "function") throw new Error("Embedder failed to initialize");
   if (typeof generator !== "function") throw new Error("Generator failed to initialize");
