@@ -1,6 +1,4 @@
-// Import the ESM build of Transformers directly in the module.
-// Using esm.sh avoids ORB/UMD issues in some browsers/CDNs.
-import { pipeline } from "https://esm.sh/@xenova/transformers@2.15.1";
+import { pipeline } from "https://cdn.jsdelivr.net/npm/@xenova/transformers@2.15.1?module";
 
 import { loadEmbeddings, topK, buildPrompt } from "./rag.js";
 
