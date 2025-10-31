@@ -1,5 +1,21 @@
-// js/chat.js
 import { loadEmbeddings, topK, buildPrompt } from "./rag.js";
+
+async function waitForTransformers(maxMs = 10000) {
+  const start = performance.now();
+  while (!window.transformers) {
+    if (performance.now() - start > maxMs) throw new Error("Transformers.js failed to load");
+    await new Promise(r => setTimeout(r, 50));
+  }
+}
+
+
+async function waitForTransformers(maxMs = 10000) {
+  const start = performance.now();
+  while (!window.transformers) {
+    if (performance.now() - start > maxMs) throw new Error("Transformers.js failed to load");
+    await new Promise(r => setTimeout(r, 50));
+  }
+}
 
 const stream = document.getElementById("stream");
 const form = document.getElementById("ask");
@@ -7,35 +23,30 @@ const qInput = document.getElementById("q");
 const luckyBtn = document.getElementById("lucky");
 const statusEl = document.getElementById("status");
 
-// Models
 let embedder, generator, meta, embs, dim;
 
-function addMsg(text, who="bot", sources=[]) {
-  const div = document.createElement("div");
-  div.className = `msg ${who==="user" ? "msg-user" : "msg-bot"}`;
-  div.innerHTML = `<div>${text}</div>` +
-    (sources.length ? `<div class="sources mt-2">${
-      sources.map(s => `<small>• <a href="${s.url}" target="_blank">${s.title}</a></small>`).join("")
-    }</div>` : "");
-  stream.appendChild(div);
-  stream.scrollTop = stream.scrollHeight;
-}
+function addMsg(text, who="bot", sources=[]) { /* unchanged */ }
 
 async function init() {
   addMsg("👋 Hi! Ask me for meal ideas, ingredients, or cooking tips from our recipe set.");
+
+  // 1) Ensure transformers is ready
+  await waitForTransformers();
   const { pipeline } = window.transformers;
 
-  // Load RAG data
+  // 2) Load embeddings
   ({ meta, embs, dim } = await loadEmbeddings());
 
-  // Embedding model (fast)
+  // 3) Pipelines
   embedder = await pipeline("feature-extraction", "Xenova/all-MiniLM-L6-v2", { quantized: true });
-
-  // Small instruct model for answers (keep answers concise; rely on retrieval)
   generator = await pipeline("text-generation", "Xenova/Qwen2.5-0.5B-Instruct", { quantized: true });
+
+  if (typeof embedder !== "function") throw new Error("Embedder failed to initialize");
+  if (typeof generator !== "function") throw new Error("Generator failed to initialize");
 
   statusEl.textContent = "Ready.";
 }
+
 
 async function embedQuery(text) {
   const out = await embedder(text, { pooling: "mean", normalize: true });
