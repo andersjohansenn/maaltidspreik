@@ -1,21 +1,10 @@
-// Browser-native ESM build
 import { pipeline, env } from "https://cdn.jsdelivr.net/npm/@xenova/transformers@2.15.1?module";
 import { loadEmbeddings, topK, buildPrompt } from "./rag.js";
 
-/* ---- ONNX runtime stability knobs ----
-   We disable SIMD + multithreading and pin the wasm path to the non-SIMD build.
-   This avoids the "RangeError: offset is out of bounds" seen on some setups.
-*/
-env.allowLocalModels = false;        // don't probe /models on your domain
-env.remoteModels = true;
+const BACKEND = "https://andersjohansenn-maaltidspreik.hf.space";
 
-// Force non-SIMD, single-thread runtime
-env.backends ??= {};
-env.backends.onnx ??= { wasm: {} };
-env.backends.onnx.wasm.simd = false;
-env.backends.onnx.wasm.numThreads = 1;
-// Make sure we load the non-SIMD .wasm
-env.backends.onnx.wasm.wasmPaths = "https://cdn.jsdelivr.net/npm/onnxruntime-web@1.18.0/dist/"; // will pick ort-wasm.wasm
+env.allowLocalModels = false;   // never probe /models on Pages
+env.remoteModels = true;        // always fetch models from HF Hub
 
 const stream = document.getElementById("stream");
 const form = document.getElementById("ask");
@@ -23,7 +12,22 @@ const qInput = document.getElementById("q");
 const luckyBtn = document.getElementById("lucky");
 const statusEl = document.getElementById("status");
 
-let embedder, generator, meta, embs, dim;
+let generator, meta, embs, dim;
+
+// 03) Server-side embedding via HF Space
+async function embedOnServer(text) {
+  const safe = (text || "").slice(0, 1000); // match backend cleaner
+  const r = await fetch(`${BACKEND}/embed`, {
+    method: "POST",
+    headers: {"content-type": "application/json"},
+    body: JSON.stringify({ text: safe })
+  });
+  if (!r.ok) throw new Error(`embed failed: ${r.status}`);
+  const j = await r.json();
+  const arr = new Float32Array(j.embedding.length);
+  for (let i = 0; i < j.embedding.length; i++) arr[i] = j.embedding[i];
+  return arr; // Float32Array length 384
+}
 
 function addMsg(text, who="bot", sources=[]) {
   const div = document.createElement("div");
@@ -39,47 +43,14 @@ function addMsg(text, who="bot", sources=[]) {
 async function init() {
   addMsg("👋 Hi! Ask me for meal ideas, ingredients, or cooking tips from our recipe set.");
 
-  // Load RAG data
+  // Load RAG data (your prebuilt chunk vectors)
   ({ meta, embs, dim } = await loadEmbeddings());
 
-  // --- Embedder: NON-quantized, alternate MiniLM (L12) ---
-  // L12 tends to be more stable in-browser than L6 on some machines.
-  embedder = await pipeline("feature-extraction", "Xenova/all-MiniLM-L12-v2", {
-    quantized: false,
-  });
+  // Generator stays in-browser (public, quantized)
+  generator = await pipeline("text-generation", "Xenova/TinyLlama-1.1B-Chat-v1.0", { quantized: true });
 
-  // Pre-warm with a tiny input to allocate buffers in a controlled way
-  try { await embedder("hi", { pooling: "mean", normalize: true, truncation: true, max_length: 16 }); } catch {}
-
-  // Generator: keep quantized (public model)
-  generator = await pipeline("text-generation", "Xenova/TinyLlama-1.1B-Chat-v1.0", {
-    quantized: true,
-  });
-
-  if (typeof embedder !== "function") throw new Error("Embedder failed to initialize");
   if (typeof generator !== "function") throw new Error("Generator failed to initialize");
-
   statusEl.textContent = "Ready.";
-}
-
-async function embedQuery(text) {
-  const safe = (text || "").slice(0, 600); // keep short for stability
-  const baseOpts = { pooling: "mean", normalize: true, truncation: true };
-
-  // Try progressively smaller token budgets
-  const tries = [64, 48, 32];
-
-  let lastErr;
-  for (const ml of tries) {
-    try {
-      const out = await embedder(safe, { ...baseOpts, max_length: ml });
-      return new Float32Array(out.data); // 384-d vector for MiniLM
-    } catch (err) {
-      lastErr = err;
-      console.warn(`Embedder failed at max_length=${ml}.`, err);
-    }
-  }
-  throw lastErr || new Error("Embedding failed");
 }
 
 function selectChunks(top) {
@@ -92,7 +63,8 @@ async function answer(question, lucky=false) {
 
   let qvec;
   try {
-    qvec = await embedQuery(question);
+    // 🔁 Embed on the server (MiniLM-L6-v2, normalized, 384-dim)
+    qvec = await embedOnServer(question);
   } catch (e) {
     console.error("Embedding crashed:", e);
     addMsg("Sorry, I had trouble understanding that question. Try a shorter phrasing.", "bot");
@@ -100,6 +72,7 @@ async function answer(question, lucky=false) {
     return;
   }
 
+  // client-side retrieval
   const top = topK(embs, dim, qvec, lucky ? 3 : 5);
   const picked = selectChunks(top);
 
