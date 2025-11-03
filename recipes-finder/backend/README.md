@@ -1,3 +1,10 @@
-# Recipes Finder Backend
+---
+title: Maaltidspreik
+emoji: 🔥
+colorFrom: pink
+colorTo: gray
+sdk: docker
+pinned: false
+---
 
-This directory contains placeholder files for the backend service.
+Check out the configuration reference at https://huggingface.co/docs/hub/spaces-config-reference

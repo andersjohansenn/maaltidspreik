@@ -11,7 +11,6 @@ import requests
 from fastapi import FastAPI, HTTPException, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
 
-
 BASE = "https://www.themealdb.com/api/json/v1/1/"
 DEFAULT_TIMEOUT = 10
 
@@ -96,6 +95,7 @@ logger.propagate = False
 # FastAPI setup --------------------------------------------------------------
 app = FastAPI(title="Maaltidspreik API")
 
+
 allowed_origins = [
     "https://andersjohansenn.github.io",
     "https://andersjohansenn.github.io/maaltidspreik",
@@ -124,6 +124,127 @@ async def log_requests(request: Request, call_next):
         duration = (time.time() - start) * 1000
         logger.error("Server error %s %s -> %s (%.1f ms)", request.method, request.url.path, response.status_code, duration)
     return response
+
+
+# === SERVER-SIDE GENERATION (small CPU model) ===
+from pydantic import BaseModel
+from fastapi import HTTPException
+from threading import Lock
+import torch
+from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline
+
+class GenerateIn(BaseModel):
+    prompt: str
+    max_new_tokens: int = 120
+    temperature: float = 0.4
+    top_p: float = 0.9
+    repetition_penalty: float = 1.1
+
+_gen_lock = Lock()
+_gen_pipe = None
+
+def get_generator():
+    """
+    Load a small, public instruct model that fits in HF free CPU memory.
+    """
+    global _gen_pipe
+    if _gen_pipe is not None:
+        return _gen_pipe
+
+    with _gen_lock:
+        if _gen_pipe is not None:
+            return _gen_pipe
+
+        model_id = "sshleifer/tiny-gpt2"
+
+        # Keep CPU usage modest
+        torch.set_num_threads(1)
+
+        tok = AutoTokenizer.from_pretrained(model_id, use_fast=True)
+        mdl = AutoModelForCausalLM.from_pretrained(
+            model_id,
+            torch_dtype=torch.float32,       # CPU-safe
+            low_cpu_mem_usage=True
+        )
+
+        # Ensure we have a pad token id
+        if tok.pad_token_id is None:
+            tok.pad_token_id = tok.eos_token_id
+
+        _gen_pipe = pipeline(
+            "text-generation",
+            model=mdl,
+            tokenizer=tok,
+            device=-1,                       # CPU
+            torch_dtype=torch.float32
+        )
+        return _gen_pipe
+
+@app.post("/generate")
+def generate_text(inp: GenerateIn):
+    """
+    Fallback generator that returns a random canned reply instead of loading an LLM.
+    This avoids memory errors on the free CPU tier.
+    """
+    prompt = (inp.prompt or "").strip()
+    if not prompt:
+        raise HTTPException(status_code=400, detail="Empty prompt")
+
+    import random
+    
+    samples = [
+        "That sounds delicious! Maybe try a pasta or a chicken-based meal?",
+        "How about a quick stir-fry with whatever veggies you have on hand?",
+        "I’d go for something cozy, like soup or stew!",
+        "You could explore one of our seafood dishes — they’re easy and healthy."
+    ]
+    return {"text": random.choice(samples)}
+
+# === END SERVER-SIDE GENERATION ===
+
+
+# === EMBEDDING ENDPOINT ===
+from pydantic import BaseModel
+from fastapi import HTTPException
+from threading import Lock
+import numpy as np
+from sentence_transformers import SentenceTransformer
+
+_embedder_lock = Lock()
+_embedder_model = None
+
+class EmbedIn(BaseModel):
+    text: str
+
+def _clean_text(s: str, limit_chars: int = 1000) -> str:
+    s = (s or "").replace("\n", " ").strip()
+    return s[:limit_chars]
+
+def get_embedder():
+    global _embedder_model
+    if _embedder_model is None:
+        with _embedder_lock:
+            if _embedder_model is None:
+                # Same model you used offline for building the index
+                _embedder_model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
+    return _embedder_model
+
+@app.post("/embed")
+def embed(payload: EmbedIn):
+    """
+    Return a 384-dim embedding (list[float]) using all-MiniLM-L6-v2.
+    """
+    txt = _clean_text(payload.text)
+    if not txt:
+        raise HTTPException(status_code=400, detail="Empty text")
+    model = get_embedder()
+    try:
+        vec = model.encode([txt], normalize_embeddings=True)[0]  # shape (384,)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Embedding failed: {e}")
+    return {"embedding": [float(x) for x in vec]}
+# === END EMBEDDING ENDPOINT ===
+
 
 
 # Caches ---------------------------------------------------------------------
