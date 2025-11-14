@@ -13,11 +13,18 @@
     .meta{padding:.5rem .75rem .75rem}
     .filters{display:flex;flex-wrap:wrap;gap:.5rem;margin:.75rem 0}
     .filters label{font-size:1.3rem}
+    #utensils{margin-right: 0.5rem;}
+    #chatbot{font-size:2.5rem;color:#43270F;}
+    #search{margin-right:0.5rem;}
+    #clear{margin-right:0.5rem;}
+     html[data-theme="dark"] {
+      #chatbot{color:#F5F5F5;}
+     }
   </style>
 </head>
 <body>
   <div class="container">
-    <a href="chat.html" class="btn btn-outline-primary">🤖 Chat-mode (beta)</a> <br><br>                                                                                                                                                                 
+    <a href="chat.html" class="btn btn-outline-primary"><i id="chatbot" class="fa-solid fa-robot"></i></a> <br><br>                                                                                                                                                                 
     <div class="header">  
     <div class="light-dark">  
       <button id="lightBtn" onclick="switchLight()" aria-label="Light mode"><i class="fa-solid fa-sun"></i></button>
@@ -25,7 +32,10 @@
     <i class="fa-solid fa-moon"></i>
   </button>
     </div>
-      <h1>Recipes Finder</h1>                                                    
+    <div class="title">
+    
+    <h1><i id="utensils" class="fa-solid fa-utensils"></i>Recipes Finder</h1>
+    </div>
 
   <form id="filters-form" class="filters">
     <div class="filter_group">
@@ -46,8 +56,8 @@
     </label></div>
     <br><br>
     <div class="buttons">
-    <button type="submit">Search</button>
-    <button type="button" id="clear-filters">Clear</button>
+    <button type="submit"><i id="search" class="fa-solid fa-magnifying-glass"></i>Search</button>
+    <button type="button" id="clear-filters"><i id="clear" class="fa-solid fa-broom"></i>Clear</button>
     </div>
   </form>
 </div>
