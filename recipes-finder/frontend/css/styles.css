@@ -217,3 +217,104 @@ html[data-theme="dark"] {
   box-shadow:0 2px 6px rgba(0,0,0,.1);
   transition:transform .2s}
 } 
+
+/* ==========================================================
+   Chat Page Styling — Matches Recipe Finder (index.html)
+   ========================================================== */
+
+.rf-hero {
+  border-radius: 20px;
+  padding: 2.3rem 1.8rem 2.6rem;
+  color: #3F2813;
+}
+
+.rf-title {
+  font-family: "Georgia", serif;
+  color: #3F2813;
+  font-size: 2.3rem;
+  font-weight: 700;
+}
+
+.rf-subtitle {
+  color: #3F2813;
+  font-size: 1rem;
+  opacity: 0.9;
+}
+
+/* Icon boxes (same style used in index.html) */
+.rf-icon-box {
+  background-color: #FCF6F1;
+  width: 38px;
+  height: 38px;
+  border-radius: 8px;
+  box-shadow: 0 3px 12px rgba(0,0,0,0.12);
+}
+
+/* Chat card wrapper */
+.rf-chat-card {
+  border-radius: 18px;
+  background-color: #FFFFFF;
+  border: 1px solid rgba(0,0,0,0.05);
+  box-shadow: 0 14px 28px rgba(0,0,0,0.07);
+}
+
+.rf-chat-card-body {
+  padding: 1.3rem 1.2rem;
+}
+
+/* Messages area (soft beige to match site softness) */
+.rf-chat-messages {
+  background-color: #F8EFE8;
+  border-radius: 14px;
+  padding: 0.75rem;
+  max-height: 55vh;
+  overflow-y: auto;
+}
+
+/* Individual message bubbles */
+.rf-chat-messages .msg {
+  border-radius: 12px;
+  padding: 0.65rem 0.9rem;
+  margin-bottom: 0.6rem;
+  background-color: white;
+  border: 1px solid rgba(0,0,0,0.06);
+  font-size: 0.95rem;
+}
+
+.rf-chat-messages .msg-user {
+  background-color: #E5EDFC;
+  border-color: rgba(50,100,200,0.25);
+  margin-left: 12%;
+}
+
+.rf-chat-messages .msg-bot {
+  margin-right: 12%;
+}
+
+/* Buttons */
+.rf-primary-btn {
+  background-color: #C88C70;
+  border-color: #C88C70;
+  color: #FCF6F1;
+  border-radius: 999px;
+  padding-inline: 1.3rem;
+  font-weight: 600;
+}
+
+.rf-primary-btn:hover {
+  background-color: #B57D62;
+  border-color: #B57D62;
+}
+
+.rf-secondary-btn {
+  background-color: #F3E0D2;
+  border-color: #F3E0D2;
+  color: #3F2813;
+  border-radius: 999px;
+  padding-inline: 1.3rem;
+}
+
+.rf-secondary-btn:hover {
+  background-color: #E8D4C5;
+  borde
+
