@@ -627,7 +627,7 @@ def get_meals(
     else:
         base = random_meals(limit, tag=tag)
         total = len(base)
-        has_next = False
+        has_next = True
         page = 1
         start = 0
         end = total
