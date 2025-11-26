@@ -66,68 +66,136 @@ function render(meal) {
   }
   
   (async function boot() {
+  
     const id = getId();
+  
+    console.log('Recipe ID from URL:', id);
+  
     if (!id) {
+  
       document.querySelector("#content").innerHTML = `<p>Missing recipe id.</p>`;
+  
       return;
+  
     }
+  
     try {
+  
       const { meta, embs, dim } = await loadEmbeddings();
+  
+      console.log('Meta data:', meta);
+  
       const mealChunks = meta.filter(m => m.recipe_id === id);
+  
       if (mealChunks.length === 0) {
+  
         document.querySelector("#content").innerHTML = `<p>Recipe not found.</p>`;
+  
         return;
+  
       }
   
+  
+  
       const meal = {
+  
         ...mealChunks[0],
+  
         text: mealChunks.map(c => c.text).join('\n'),
+  
         strInstructions: mealChunks.map(c => (c.text.split('STEPS:')[1] || '').trim()).join('\n'),
+  
         strMeal: mealChunks[0].title,
+  
         strMealThumb: mealChunks[0].thumb,
+  
         strCategory: mealChunks[0].category,
+  
         strArea: mealChunks[0].area,
+  
         strTags: mealChunks[0].tags,
+  
       };
+  
       render(meal);
   
+  
+  
       const mealIndex = meta.findIndex(m => m.chunk_id === mealChunks[0].chunk_id);
+  
       const start = mealIndex * dim;
+  
       const queryEmbedding = embs.subarray(start, start + dim);
-      const similar = await findSimilar(queryEmbedding, 10, meta, embs, dim);
+  
+      const similar = await findSimilar(queryEmbedding, 10, meta, embs, dim); 
+  
+  
   
       const relatedContainer = document.getElementById('related-recipes');
+  
       if (similar && similar.length > 0) {
+  
         const uniqueRecipes = similar
-          .filter(s => s.chunk.recipe_id !== id)
+  
+          .filter(s => s.chunk.recipe_id !== id) 
+  
           .reduce((acc, s) => {
+  
             if (!acc.some(item => item.chunk.recipe_id === s.chunk.recipe_id)) {
+  
               acc.push(s);
+  
             }
+  
             return acc;
+  
           }, [])
+  
           .slice(0, 3);
   
+  
+  
         const cards = uniqueRecipes
+  
           .map(s => {
+  
             const mealId = s.chunk.recipe_id;
+  
             const mealName = s.chunk.title;
+  
             const thumb = `https://www.themealdb.com/images/media/meals/${encodeURIComponent(mealName)}-${mealId}.jpg`;
+  
             return `
+  
           <div class="card">
+  
             <a href="recipe.html?id=${mealId}">
+  
               <img src="${thumb}" alt="${mealName}" loading="lazy">
+  
               <div class="card-content">
+  
                 <h3>${mealName}</h3>
+  
               </div>
+  
             </a>
+  
           </div>
-        `}).join('');      relatedContainer.innerHTML = `<h2>Related Recipes</h2><div class="card-container">${cards}</div>`;
+  
+        `}).join('');
+  
+        relatedContainer.innerHTML = `<h2>Related Recipes</h2><div class="card-container">${cards}</div>`;
+  
+      }
+  
+    } catch (e) {
+  
+      document.querySelector("#content").innerHTML = `<p>Failed to load recipe. ${e.message}</p>`;
+  
     }
-  } catch (e) {
-    document.querySelector("#content").innerHTML = `<p>Failed to load recipe. ${e.message}</p>`;
-  }
-})();
+  
+  })();
 
 const htmlRoot = document.documentElement;
 const lightBtn = document.getElementById("lightBtn");
