@@ -31,7 +31,8 @@ function render(meal) {
     return;
   }
   const name = meal.strMeal || meal.name;
-  const img = meal.strMealThumb || meal.thumb;
+  const id = meal.idMeal || meal.recipe_id;
+  const img = meal.strMealThumb || `https://www.themealdb.com/images/media/meals/${name}-${id}.jpg`;
   const cat = meal.strCategory || meal.category || "-";
   const area = meal.strArea || meal.area || "-";
   const tags = (meal.strTags || meal.tags || "").split(",").filter(Boolean).join(", ") || "-";
@@ -107,16 +108,20 @@ function render(meal) {
         .slice(0, 3);
 
       const cards = uniqueRecipes
-        .map(s => `
+        .map(s => {
+          const mealId = s.chunk.recipe_id;
+          const mealName = s.chunk.title;
+          const thumb = `https://www.themealdb.com/images/media/meals/${mealName}-${mealId}.jpg`;
+          return `
         <div class="card">
-          <a href="/recipes-finder/frontend/recipe.html?id=${s.chunk.recipe_id}">
-            <img src="${s.chunk.thumb}" alt="${s.chunk.title}" loading="lazy">
+          <a href="recipe.html?id=${mealId}">
+            <img src="${thumb}" alt="${mealName}" loading="lazy">
             <div class="card-content">
-              <h3>${s.chunk.title}</h3>
+              <h3>${mealName}</h3>
             </div>
           </a>
         </div>
-      `).join('');
+      `}).join('');
       relatedContainer.innerHTML = `<h2>Related Recipes</h2><div class="card-container">${cards}</div>`;
     }
   } catch (e) {
