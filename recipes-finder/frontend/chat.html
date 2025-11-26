@@ -22,6 +22,7 @@
 
   <!-- Your global styles -->
   <link rel="stylesheet" href="css/styles.css" />
+  <link rel="stylesheet" href="css/chat-styles.css" />
 </head>
 
 <body class="rf-chat-body">
@@ -37,11 +38,11 @@
 
         <!-- Right icon boxes (match settings / theme idea) -->
         <div class="d-flex gap-2">
-          <div class="rf-chat-icon-box d-flex align-items-center justify-content-center">
-            <i class="fa-solid fa-gear"></i>
-          </div>
-          <div class="rf-chat-icon-box d-flex align-items-center justify-content-center">
-            <i class="fa-solid fa-moon"></i>
+          <div class="light-dark">  
+            <button id="lightBtn" onclick="switchLight()" aria-label="Light mode"><i class="fa-solid fa-sun"></i></button>
+            <button id="darkBtn" onclick="switchDark()" aria-label="Dark mode">
+              <i class="fa-solid fa-moon"></i>
+            </button>
           </div>
         </div>
       </div>
@@ -66,8 +67,8 @@
 
             <!-- Back link row, uses same arrow icon as recipes.html -->
             <div class="d-flex align-items-center mb-3 gap-2">
-              <a href="index.html" class="rf-chat-back-link d-inline-flex align-items-center">
-                <i id="arrow" class="fa-solid fa-arrow-left-long me-2"></i>
+              <a href="index.html" class="rf-chat-back-link d-inline-flex align-items-center" style="text-decoration: underline;">
+                <i class="fa-solid fa-arrow-left-long me-2"></i>
                 <span>Back to recipes</span>
               </a>
             </div>
@@ -113,5 +114,33 @@
   ></script>
 
   <script type="module" src="./js/chat.js?v=9"></script>
+  <script>
+    const htmlRoot = document.documentElement;
+    const lightBtn = document.getElementById("lightBtn");
+    const darkBtn = document.getElementById("darkBtn");
+
+    window.switchLight = function () {
+      htmlRoot.removeAttribute("data-theme");
+      localStorage.setItem("theme", "light");
+      lightBtn.classList.add("active");
+      darkBtn.classList.remove("active");
+    };
+
+    window.switchDark = function () {
+      htmlRoot.setAttribute("data-theme", "dark");
+      localStorage.setItem("theme", "dark");
+      darkBtn.classList.add("active");
+      lightBtn.classList.remove("active");
+    };
+
+    // Load saved theme on page load
+    const savedTheme = localStorage.getItem("theme");
+    if (savedTheme === "dark") {
+      htmlRoot.setAttribute("data-theme", "dark");
+      darkBtn.classList.add("active");
+    } else {
+      lightBtn.classList.add("active");
+    };
+  </script>
 </body>
 </html>

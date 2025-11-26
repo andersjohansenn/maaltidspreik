@@ -1,0 +1,216 @@
+/* Chat page specific styles */
+
+body.rf-chat-body {
+  background-color: #fdf6f0;
+}
+
+.rf-chat-hero {
+  background-color: #d2886a;
+  padding: 2rem;
+  border-radius: 12px;
+  color: white;
+}
+
+.rf-chat-icon-box {
+  width: 40px;
+  height: 40px;
+  background-color: #fdf6f0;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #43270F;
+}
+
+.rf-chat-title {
+  font-size: 2.5rem;
+  font-family: Georgia, sans-serif;
+  color: white;
+}
+
+.rf-chat-subtitle {
+  max-width: 600px;
+  color: white;
+}
+
+.rf-chat-card {
+  background-color: #fdf6f0;
+  border-radius: 12px;
+  border: 1px solid #EFAF8D;
+}
+
+.rf-chat-card-body {
+  padding: 2rem;
+}
+
+.rf-chat-back-link {
+  color: #43270F;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.rf-chat-messages {
+  height: 400px;
+  overflow-y: auto;
+  margin-bottom: 1rem;
+  border: 1px solid #EFAF8D;
+  border-radius: 8px;
+  padding: 1rem;
+  background-color: white;
+}
+
+.rf-chat-input-field {
+  border: 1px solid #43270F;
+}
+
+.rf-chat-primary-btn {
+  background-color: #EFAF8D;
+  color: white;
+  border: 1px solid #EFAF8D;
+}
+
+.rf-chat-secondary-btn {
+
+  background-color: #fdf6f0;
+
+  color: #43270F;
+
+  border: 1px solid #43270F;
+
+}
+
+
+
+#lightBtn i, #darkBtn i {
+
+
+
+  color: inherit;
+
+
+
+}
+
+
+
+
+
+
+
+#lightBtn i.fa-solid.fa-sun {
+
+
+
+  color: #F5F5F5; /* Light mode icon color */
+
+
+
+}
+
+
+
+
+
+
+
+#darkBtn i.fa-solid.fa-moon {
+
+
+
+  color: #43270F; /* Dark mode icon color */
+
+
+
+}
+
+
+
+
+
+
+
+html[data-theme="dark"] #lightBtn i.fa-solid.fa-sun {
+
+
+
+  color: #F5F5F5; /* Light mode icon color in dark theme */
+
+
+
+}
+
+
+
+
+
+
+
+html[data-theme="dark"] #darkBtn i.fa-solid.fa-moon {
+
+
+
+  color: #121212; /* Dark mode icon color in dark theme */
+
+
+
+}
+
+
+
+/* Dark theme for chat page */
+
+html[data-theme="dark"] body.rf-chat-body {
+
+  background-color: #121212;
+
+  color: #F5F5F5;
+
+}
+
+html[data-theme="dark"] .rf-chat-hero {
+  background-color: #242424;
+}
+
+html[data-theme="dark"] .rf-chat-icon-box {
+  background-color: #333;
+  color: #F5F5F5;
+}
+
+html[data-theme="dark"] .rf-chat-title {
+  color: #F5F5F5;
+}
+
+html[data-theme="dark"] .rf-chat-subtitle {
+  color: #F5F5F5;
+}
+
+html[data-theme="dark"] .rf-chat-card {
+  background-color: #242424;
+  border: 1px solid #333;
+}
+
+html[data-theme="dark"] .rf-chat-back-link {
+  color: #F5F5F5;
+}
+
+html[data-theme="dark"] .rf-chat-messages {
+  background-color: #333;
+  border-color: #444;
+}
+
+html[data-theme="dark"] .rf-chat-input-field {
+  background-color: #333;
+  color: #F5F5F5;
+  border-color: #F5F5F5;
+}
+
+html[data-theme="dark"] .rf-chat-primary-btn {
+  background-color: #2352ee;
+  border-color: #2352ee;
+}
+
+html[data-theme="dark"] .rf-chat-secondary-btn {
+  background-color: #333;
+  color: #F5F5F5;
+  border-color: #F5F5F5;
+}
