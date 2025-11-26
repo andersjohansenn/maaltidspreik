@@ -251,22 +251,47 @@ html[data-theme="dark"] {
   font-size: 1.1rem;
 }
 
-header{background-color: #fdf6f0; text-align: center;padding-bottom: 3px;}
-header h1{font-size: 4rem;}
-.wrap{max-width:900px;margin:0 auto;padding:1rem}
-.hero{display:grid;grid-template-columns:280px 1fr;gap:1rem;align-items:start}
-.hero img{width:100%;border-radius:12px;display:block}
-#content {display: block; margin-top: 1rem;background-color:light-dark( #d2886a,#242424); padding: 3%; border-radius: 12px;box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;}
-table{border-collapse:collapse;width:100%;border: 2px solid light-dark(#43270F,#eee); background-color:light-dark(#fdf6f0,#353535);}
-td,th{border:1px solid #eee;padding:.5rem .6rem;border: 2px solid light-dark(#43270F,#eee);}
-h1,h2{margin:.6rem 0}
-#arrow{font-size:2rem;text-decoration:none;color:#43270F;}
-html[data-theme="dark"] {
-  header{background-color: #121212;}
-  #content {background-color:#242424;box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;}
-  #lightBtn, #darkBtn {border: 2px solid #F5F5F5 ;}
-  table{border: 2px solid #eee; background-color:#353535;}
-  td,th{border: 2px solid #eee;}
-  #arrow{color:#F5F5F5;}
+#related-recipes h2 {
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
 }
+
+.card-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.card a {
+  text-decoration: none;
+  color: inherit;
+}
+
+.card img {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 12px 12px 0 0; /* Rounded top corners for images */
+}
+
+.card-content {
+  padding: 1rem;
+}
+
+.card {
+  border:1px solid #eee;
+  border-radius:12px;
+  overflow:hidden;
+  background-color: light-dark(#fff, #1E1E1E);
+  box-shadow:0 2px 6px rgba(0,0,0,.1);
+  transition:transform .2s;
+}
+
+/* Ensure the dark theme styles are applied correctly to the new cards */
+html[data-theme="dark"] .card {
+  background-color: #1E1E1E;
+  border: 1px solid #333;
+}
+
 
