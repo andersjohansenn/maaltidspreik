@@ -108,7 +108,7 @@ function render(meal) {
         </div>
       `}));
       
-      relatedContainer.innerHTML = `<h2>Related Recipes</h2><div class="card-container">${recipeCards.join('')}</div>`;
+      relatedContainer.innerHTML = `<h2>Related Recipes</h2><div class="grid">${recipeCards.join('')}</div>`;
     }
   } catch (e) {
     document.querySelector("#content").innerHTML = `<p>Failed to load recipe. ${e.message}</p>`;
