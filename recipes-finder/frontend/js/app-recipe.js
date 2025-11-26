@@ -69,8 +69,6 @@ function render(meal) {
   
     const id = getId();
   
-    console.log('Recipe ID from URL:', id);
-  
     if (!id) {
   
       document.querySelector("#content").innerHTML = `<p>Missing recipe id.</p>`;
@@ -82,8 +80,6 @@ function render(meal) {
     try {
   
       const { meta, embs, dim } = await loadEmbeddings();
-  
-      console.log('Meta data:', meta);
   
       const mealChunks = meta.filter(m => m.recipe_id === id);
   

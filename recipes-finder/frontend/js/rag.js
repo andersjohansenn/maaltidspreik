@@ -1,14 +1,35 @@
 export async function loadEmbeddings() {
-  const [metaRes, embRes] = await Promise.all([
-    fetch("./data/chunks.json"),
-    fetch("./data/embeddings.bin"),
-  ]);
-  const meta = await metaRes.json();
-  const buf = await embRes.arrayBuffer();
-  const embs = new Float32Array(buf);  // row-major [N,384], normalized
-  const dim = 384;
-  const n = embs.length / dim;
-  return { meta, embs, dim, n };
+  try {
+    const [metaRes, embRes] = await Promise.all([
+      fetch("./data/chunks.json"),
+      fetch("./data/embeddings.bin"),
+    ]);
+
+    if (!metaRes.ok) {
+      throw new Error(`Failed to load chunks.json: ${metaRes.status} ${metaRes.statusText}`);
+    }
+    if (!embRes.ok) {
+      throw new Error(`Failed to load embeddings.bin: ${embRes.status} ${embRes.statusText}`);
+    }
+
+    const meta = await metaRes.json();
+    const buf = await embRes.arrayBuffer();
+    const embs = new Float32Array(buf);  // row-major [N,384], normalized
+    const dim = 384;
+    const n = embs.length / dim;
+
+    if (!meta || meta.length === 0) {
+      throw new Error("Meta data is empty.");
+    }
+    if (!embs || embs.length === 0) {
+      throw new Error("Embeddings data is empty.");
+    }
+
+    return { meta, embs, dim, n };
+  } catch (e) {
+    console.error("Failed to load embeddings:", e);
+    throw e;
+  }
 }
 
 export function cosineSim(a, b) {
