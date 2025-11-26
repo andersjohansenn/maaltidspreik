@@ -1,5 +1,6 @@
 // js/app-recipe.js
-import { fetchMealById } from "./api.js";
+import { fetchMealById, fetchEmbedding } from "./api.js";
+import { findSimilar } from "./rag.js";
 
 function getId() {
   const u = new URL(location.href);
@@ -53,6 +54,8 @@ function render(meal) {
 
     <h2>Instructions</h2>
     ${instr.map(p => `<p>${p}</p>`).join("")}
+
+    <div id="related-recipes"></div>
   `;
 }
 
@@ -66,6 +69,25 @@ function render(meal) {
     // Browser will cache the image automatically once loaded.
     const meal = await fetchMealById(id);
     render(meal);
+
+    const recipeText = `${meal.strMeal} ${meal.strCategory} ${meal.strArea} ${meal.strTags} ${buildIngredients(meal).map(i => i.ingredient).join(' ')}`;
+    const embedding = await fetchEmbedding(recipeText);
+    const similar = await findSimilar(embedding, 3);
+
+    const relatedContainer = document.getElementById('related-recipes');
+    if (similar && similar.length > 0) {
+      const cards = similar.map(s => `
+        <div class="card">
+          <a href="/recipes-finder/frontend/recipe.html?id=${s.chunk.id}">
+            <img src="${s.chunk.thumb}" alt="${s.chunk.name}" loading="lazy">
+            <div class="card-content">
+              <h3>${s.chunk.name}</h3>
+            </div>
+          </a>
+        </div>
+      `).join('');
+      relatedContainer.innerHTML = `<h2>Related Recipes</h2><div class="card-container">${cards}</div>`;
+    }
   } catch (e) {
     document.querySelector("#content").innerHTML = `<p>Failed to load recipe. ${e.message}</p>`;
   }

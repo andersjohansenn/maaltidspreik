@@ -43,3 +43,13 @@ export async function fetchMealById(id) {
   if (!r.ok) throw new Error("meal failed");
   return (await r.json()).meal || null;
 }
+
+export async function fetchEmbedding(text) {
+  const r = await fetch(`${BASE}/embed`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ text }),
+  });
+  if (!r.ok) throw new Error("embedding failed");
+  return (await r.json()).embedding || null;
+}
