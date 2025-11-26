@@ -251,12 +251,41 @@ html[data-theme="dark"] {
   font-size: 1.1rem;
 }
 
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1rem;list-style:none;padding:0}
-.card{border:1px solid #eee;border-radius:12px;overflow:hidden;background-color:light-dark(#fff, #1E1E1E);box-shadow:0 2px 6px rgba(0,0,0,.1);transition:transform .2s}
-.card img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block}
-.meta{padding:.5rem .75rem .75rem}
+#related-recipes .grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill,minmax(220px,1fr));
+  gap: 1rem;
+  list-style: none;
+  padding: 0;
+}
 
-html[data-theme="dark"] .card {
+#related-recipes .card {
+  border: 1px solid #eee;
+  border-radius: 12px;
+  overflow: hidden;
+  background-color: light-dark(#fff, #1E1E1E);
+  box-shadow: 0 2px 6px rgba(0,0,0,.1);
+  transition: transform .2s;
+}
+
+#related-recipes .card img {
+  width: 100%;
+  aspect-ratio: 4/3;
+  object-fit: cover;
+  display: block;
+}
+
+#related-recipes .card .meta {
+  padding: .5rem .75rem .75rem;
+}
+
+#related-recipes h2 {
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+}
+
+html[data-theme="dark"] #related-recipes .card {
   background-color: #1E1E1E;
   border: 1px solid #333;
 }

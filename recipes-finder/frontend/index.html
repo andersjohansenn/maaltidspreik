@@ -6,6 +6,21 @@
   <title>Maaltidspreik</title>
   <link rel="stylesheet" href="css/styles.css"/>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1rem;list-style:none;padding:0}
+    .card{border:1px solid #eee;border-radius:12px;overflow:hidden;background-color:light-dark(#fff, #1E1E1E);box-shadow:0 2px 6px rgba(0,0,0,.1);transition:transform .2s}
+    .card img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block}
+    .meta{padding:.5rem .75rem .75rem}
+    .filters{display:flex;flex-wrap:wrap;gap:.5rem;margin:.75rem 0}
+    .filters label{font-size:1.3rem}
+    #utensils{margin-right: 0.5rem;}
+    #chatbot{font-size:2.5rem;color:#43270F;}
+    #search{margin-right:0.5rem;}
+    #clear{margin-right:0.5rem;}
+     html[data-theme="dark"] {
+      #chatbot{color:#F5F5F5;}
+     }
+  </style>
 </head>
 <body>
   <div class="container">
