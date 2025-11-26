@@ -7,16 +7,22 @@ function getId() {
 }
 
 function buildIngredients(meal) {
-  // TheMealDB uses strIngredient1..20 and strMeasure1..20
-  const rows = [];
-  for (let i = 1; i <= 20; i++) {
-    const ing = meal[`strIngredient${i}`];
-    const mea = meal[`strMeasure${i}`];
-    if (ing && ing.trim()) {
-      rows.push({ ingredient: ing.trim(), measure: (mea || "").trim() });
-    }
+  const text = meal.text || '';
+  const ingredientsMatch = text.match(/INGREDIENTS:(.*?)(STEPS:|$)/);
+  if (!ingredientsMatch) {
+    return [];
   }
-  return rows;
+  const ingredientsString = ingredientsMatch[1];
+  return ingredientsString.split(';')
+    .map(part => part.trim())
+    .filter(part => part)
+    .map(part => {
+      const parts = part.split(/:(.+)/);
+      if (parts.length === 2) {
+        return { ingredient: parts[1].trim(), measure: parts[0].trim() };
+      }
+      return { ingredient: part, measure: '' };
+    });
 }
 
 function render(meal) {
@@ -66,29 +72,47 @@ function render(meal) {
   }
   try {
     const { meta, embs, dim } = await loadEmbeddings();
-    const mealIndex = meta.findIndex(m => m.id === id);
-    if (mealIndex === -1) {
+    const mealChunks = meta.filter(m => m.recipe_id === id);
+    if (mealChunks.length === 0) {
       document.querySelector("#content").innerHTML = `<p>Recipe not found.</p>`;
       return;
     }
-    const meal = meta[mealIndex];
+
+    const meal = {
+      ...mealChunks[0],
+      strInstructions: mealChunks.map(c => (c.text.split('STEPS:')[1] || '').trim()).join('\n'),
+      strMeal: mealChunks[0].title,
+      strMealThumb: mealChunks[0].thumb,
+      strCategory: mealChunks[0].category,
+      strArea: mealChunks[0].area,
+      strTags: mealChunks[0].tags,
+    };
     render(meal);
 
+    const mealIndex = meta.findIndex(m => m.chunk_id === mealChunks[0].chunk_id);
     const start = mealIndex * dim;
     const queryEmbedding = embs.subarray(start, start + dim);
-    const similar = await findSimilar(queryEmbedding, 4, meta, embs, dim); // Fetch 4 to exclude the meal itself
+    const similar = await findSimilar(queryEmbedding, 10, meta, embs, dim); 
 
     const relatedContainer = document.getElementById('related-recipes');
     if (similar && similar.length > 0) {
-      const cards = similar
-        .filter(s => s.chunk.id !== id) // Exclude the current recipe
-        .slice(0, 3) // Take the top 3
+      const uniqueRecipes = similar
+        .filter(s => s.chunk.recipe_id !== id) 
+        .reduce((acc, s) => {
+          if (!acc.some(item => item.chunk.recipe_id === s.chunk.recipe_id)) {
+            acc.push(s);
+          }
+          return acc;
+        }, [])
+        .slice(0, 3);
+
+      const cards = uniqueRecipes
         .map(s => `
         <div class="card">
-          <a href="/recipes-finder/frontend/recipe.html?id=${s.chunk.id}">
-            <img src="${s.chunk.thumb}" alt="${s.chunk.name}" loading="lazy">
+          <a href="/recipes-finder/frontend/recipe.html?id=${s.chunk.recipe_id}">
+            <img src="${s.chunk.thumb}" alt="${s.chunk.title}" loading="lazy">
             <div class="card-content">
-              <h3>${s.chunk.name}</h3>
+              <h3>${s.chunk.title}</h3>
             </div>
           </a>
         </div>
