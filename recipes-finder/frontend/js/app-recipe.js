@@ -30,99 +30,99 @@ function render(meal) {
     document.querySelector("#content").innerHTML = `<p>Recipe not found.</p>`;
     return;
   }
-  const name = meal.strMeal || meal.name;
-  const id = meal.idMeal || meal.recipe_id;
-  const img = meal.strMealThumb || `https://www.themealdb.com/images/media/meals/${name}-${id}.jpg`;
-  const cat = meal.strCategory || meal.category || "-";
-  const area = meal.strArea || meal.area || "-";
-  const tags = (meal.strTags || meal.tags || "").split(",").filter(Boolean).join(", ") || "-";
-  const instr = (meal.strInstructions || "").split("\n").map(p => p.trim()).filter(Boolean);
-
-  const ing = buildIngredients(meal);
-  const ingRows = ing.map(r => `<tr><td>${r.ingredient}</td><td>${r.measure}</td></tr>`).join("");
-
-  document.querySelector("#content").innerHTML = `
-    <div class="hero">
-      <img src="${img}" alt="${name}" loading="eager" fetchpriority="high">
-      <div>
-        <h1>${name}</h1>
-        <div><strong>Category:</strong> ${cat}</div>
-        <div><strong>Area:</strong> ${area}</div>
-        <div><strong>Tags:</strong> ${tags}</div>
+    const name = meal.strMeal || meal.name;
+    const id = meal.idMeal || meal.recipe_id;
+    const img = meal.strMealThumb || `https://www.themealdb.com/images/media/meals/${encodeURIComponent(name)}-${id}.jpg`;
+    const cat = meal.strCategory || meal.category || "-";
+    const area = meal.strArea || meal.area || "-";
+    const tags = (meal.strTags || meal.tags || "").split(",").filter(Boolean).join(", ") || "-";
+    const instr = (meal.strInstructions || "").split("\n").map(p => p.trim()).filter(Boolean);
+  
+    const ing = buildIngredients(meal);
+    const ingRows = ing.map(r => `<tr><td>${r.ingredient}</td><td>${r.measure}</td></tr>`).join("");
+  
+    document.querySelector("#content").innerHTML = `
+      <div class="hero">
+        <img src="${img}" alt="${name}" loading="eager" fetchpriority="high">
+        <div>
+          <h1>${name}</h1>
+          <div><strong>Category:</strong> ${cat}</div>
+          <div><strong>Area:</strong> ${area}</div>
+          <div><strong>Tags:</strong> ${tags}</div>
+        </div>
       </div>
-    </div>
-
-    <h2>Ingredients</h2>
-    <table>
-      <thead><tr><th>Ingredient</th><th>Measure</th></tr></thead>
-      <tbody>${ingRows || `<tr><td colspan="2">No ingredients listed.</td></tr>`}</tbody>
-    </table>
-
-    <h2>Instructions</h2>
-    ${instr.map(p => `<p>${p}</p>`).join("")}
-
-    <div id="related-recipes"></div>
-  `;
-}
-
-(async function boot() {
-  const id = getId();
-  if (!id) {
-    document.querySelector("#content").innerHTML = `<p>Missing recipe id.</p>`;
-    return;
+  
+      <h2>Ingredients</h2>
+      <table>
+        <thead><tr><th>Ingredient</th><th>Measure</th></tr></thead>
+        <tbody>${ingRows || `<tr><td colspan="2">No ingredients listed.</td></tr>`}</tbody>
+      </table>
+  
+      <h2>Instructions</h2>
+      ${instr.map(p => `<p>${p}</p>`).join("")}
+  
+      <div id="related-recipes"></div>
+    `;
   }
-  try {
-    const { meta, embs, dim } = await loadEmbeddings();
-    const mealChunks = meta.filter(m => m.recipe_id === id);
-    if (mealChunks.length === 0) {
-      document.querySelector("#content").innerHTML = `<p>Recipe not found.</p>`;
+  
+  (async function boot() {
+    const id = getId();
+    if (!id) {
+      document.querySelector("#content").innerHTML = `<p>Missing recipe id.</p>`;
       return;
     }
-
-    const meal = {
-      ...mealChunks[0],
-      strInstructions: mealChunks.map(c => (c.text.split('STEPS:')[1] || '').trim()).join('\n'),
-      strMeal: mealChunks[0].title,
-      strMealThumb: mealChunks[0].thumb,
-      strCategory: mealChunks[0].category,
-      strArea: mealChunks[0].area,
-      strTags: mealChunks[0].tags,
-    };
-    render(meal);
-
-    const mealIndex = meta.findIndex(m => m.chunk_id === mealChunks[0].chunk_id);
-    const start = mealIndex * dim;
-    const queryEmbedding = embs.subarray(start, start + dim);
-    const similar = await findSimilar(queryEmbedding, 10, meta, embs, dim); 
-
-    const relatedContainer = document.getElementById('related-recipes');
-    if (similar && similar.length > 0) {
-      const uniqueRecipes = similar
-        .filter(s => s.chunk.recipe_id !== id) 
-        .reduce((acc, s) => {
-          if (!acc.some(item => item.chunk.recipe_id === s.chunk.recipe_id)) {
-            acc.push(s);
-          }
-          return acc;
-        }, [])
-        .slice(0, 3);
-
-      const cards = uniqueRecipes
-        .map(s => {
-          const mealId = s.chunk.recipe_id;
-          const mealName = s.chunk.title;
-          const thumb = `https://www.themealdb.com/images/media/meals/${mealName}-${mealId}.jpg`;
-          return `
-        <div class="card">
-          <a href="recipe.html?id=${mealId}">
-            <img src="${thumb}" alt="${mealName}" loading="lazy">
-            <div class="card-content">
-              <h3>${mealName}</h3>
-            </div>
-          </a>
-        </div>
-      `}).join('');
-      relatedContainer.innerHTML = `<h2>Related Recipes</h2><div class="card-container">${cards}</div>`;
+    try {
+      const { meta, embs, dim } = await loadEmbeddings();
+      const mealChunks = meta.filter(m => m.recipe_id === id);
+      if (mealChunks.length === 0) {
+        document.querySelector("#content").innerHTML = `<p>Recipe not found.</p>`;
+        return;
+      }
+  
+      const meal = {
+        ...mealChunks[0],
+        text: mealChunks.map(c => c.text).join('\n'),
+        strInstructions: mealChunks.map(c => (c.text.split('STEPS:')[1] || '').trim()).join('\n'),
+        strMeal: mealChunks[0].title,
+        strMealThumb: mealChunks[0].thumb,
+        strCategory: mealChunks[0].category,
+        strArea: mealChunks[0].area,
+        strTags: mealChunks[0].tags,
+      };
+      render(meal);
+  
+      const mealIndex = meta.findIndex(m => m.chunk_id === mealChunks[0].chunk_id);
+      const start = mealIndex * dim;
+      const queryEmbedding = embs.subarray(start, start + dim);
+      const similar = await findSimilar(queryEmbedding, 10, meta, embs, dim);
+  
+      const relatedContainer = document.getElementById('related-recipes');
+      if (similar && similar.length > 0) {
+        const uniqueRecipes = similar
+          .filter(s => s.chunk.recipe_id !== id)
+          .reduce((acc, s) => {
+            if (!acc.some(item => item.chunk.recipe_id === s.chunk.recipe_id)) {
+              acc.push(s);
+            }
+            return acc;
+          }, [])
+          .slice(0, 3);
+  
+        const cards = uniqueRecipes
+          .map(s => {
+            const mealId = s.chunk.recipe_id;
+            const mealName = s.chunk.title;
+            const thumb = `https://www.themealdb.com/images/media/meals/${encodeURIComponent(mealName)}-${mealId}.jpg`;
+            return `
+          <div class="card">
+            <a href="recipe.html?id=${mealId}">
+              <img src="${thumb}" alt="${mealName}" loading="lazy">
+              <div class="card-content">
+                <h3>${mealName}</h3>
+              </div>
+            </a>
+          </div>
+        `}).join('');      relatedContainer.innerHTML = `<h2>Related Recipes</h2><div class="card-container">${cards}</div>`;
     }
   } catch (e) {
     document.querySelector("#content").innerHTML = `<p>Failed to load recipe. ${e.message}</p>`;
