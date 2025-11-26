@@ -42,8 +42,7 @@ export function buildPrompt(question, selectedChunks) {
   ];
 }
 
-export async function findSimilar(queryEmbedding, k = 3) {
-  const { meta, embs, dim } = await loadEmbeddings();
+export async function findSimilar(queryEmbedding, k, meta, embs, dim) {
   const top = topK(embs, dim, queryEmbedding, k);
   return top.map(([i, score]) => ({ chunk: meta[i], score }));
 }

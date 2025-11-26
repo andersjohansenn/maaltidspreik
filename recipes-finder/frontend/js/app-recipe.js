@@ -1,6 +1,5 @@
 // js/app-recipe.js
-import { fetchMealById, fetchEmbedding } from "./api.js";
-import { findSimilar } from "./rag.js";
+import { loadEmbeddings, findSimilar } from "./rag.js";
 
 function getId() {
   const u = new URL(location.href);
@@ -66,17 +65,25 @@ function render(meal) {
     return;
   }
   try {
-    // Browser will cache the image automatically once loaded.
-    const meal = await fetchMealById(id);
+    const { meta, embs, dim } = await loadEmbeddings();
+    const mealIndex = meta.findIndex(m => m.id === id);
+    if (mealIndex === -1) {
+      document.querySelector("#content").innerHTML = `<p>Recipe not found.</p>`;
+      return;
+    }
+    const meal = meta[mealIndex];
     render(meal);
 
-    const recipeText = `${meal.strMeal} ${meal.strCategory} ${meal.strArea} ${meal.strTags} ${buildIngredients(meal).map(i => i.ingredient).join(' ')}`;
-    const embedding = await fetchEmbedding(recipeText);
-    const similar = await findSimilar(embedding, 3);
+    const start = mealIndex * dim;
+    const queryEmbedding = embs.subarray(start, start + dim);
+    const similar = await findSimilar(queryEmbedding, 4, meta, embs, dim); // Fetch 4 to exclude the meal itself
 
     const relatedContainer = document.getElementById('related-recipes');
     if (similar && similar.length > 0) {
-      const cards = similar.map(s => `
+      const cards = similar
+        .filter(s => s.chunk.id !== id) // Exclude the current recipe
+        .slice(0, 3) // Take the top 3
+        .map(s => `
         <div class="card">
           <a href="/recipes-finder/frontend/recipe.html?id=${s.chunk.id}">
             <img src="${s.chunk.thumb}" alt="${s.chunk.name}" loading="lazy">
