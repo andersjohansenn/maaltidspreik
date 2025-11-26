@@ -36,3 +36,9 @@ export async function fetchMeals({ category, area, query, tag, page = 1, limit =
   if (!r.ok) throw new Error(`meals failed: ${r.status}`);
   return await r.json(); // { meals, page, limit, total, has_prev, has_next }
 }
+
+export async function fetchMealById(id) {
+  const r = await fetch(`${BASE}/meal?id=${encodeURIComponent(id)}`);
+  if (!r.ok) throw new Error("meal failed");
+  return (await r.json()).meal || null;
+}
