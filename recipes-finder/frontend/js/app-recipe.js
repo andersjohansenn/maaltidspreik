@@ -60,6 +60,59 @@ function render(meal) {
   `;
 }
 
+async function showRelatedRecipes(id) {
+  const { meta, embs, dim } = await loadEmbeddings();
+  const mealIndex = meta.findIndex(m => m.recipe_id === id);
+  if (mealIndex === -1) {
+    // Recipe not in our chunks, so we can't find related.
+    return;
+  }
+
+  const start = mealIndex * dim;
+  const queryEmbedding = embs.subarray(start, start + dim);
+  const similar = await findSimilar(queryEmbedding, 10, meta, embs, dim);
+
+  const relatedContainer = document.getElementById('related-recipes');
+  if (!similar || similar.length === 0) {
+    relatedContainer.innerHTML = '<h2>Related Recipes</h2><p>No related recipes found.</p>';
+    return;
+  }
+
+  const uniqueRecipes = similar
+    .filter(s => s.chunk.recipe_id !== id)
+    .reduce((acc, s) => {
+      if (!acc.some(item => item.chunk.recipe_id === s.chunk.recipe_id)) {
+        acc.push(s);
+      }
+      return acc;
+    }, [])
+    .slice(0, 3);
+
+  if (uniqueRecipes.length === 0) {
+    relatedContainer.innerHTML = '<h2>Related Recipes</h2><p>No related recipes found.</p>';
+    return;
+  }
+
+  const recipeCards = await Promise.all(uniqueRecipes.map(async s => {
+    const relatedMeal = await fetchMealById(s.chunk.recipe_id);
+    const mealId = relatedMeal.idMeal;
+    const mealName = relatedMeal.strMeal;
+    const thumb = relatedMeal.strMealThumb;
+    return `
+      <div class="card">
+        <a href="recipe.html?id=${mealId}">
+          <img src="${thumb}" alt="${mealName}" loading="lazy">
+          <div class="card-content">
+            <h3>${mealName}</h3>
+          </div>
+        </a>
+      </div>
+    `;
+  }));
+
+  relatedContainer.innerHTML = `<h2>Related Recipes</h2><div class="grid">${recipeCards.join('')}</div>`;
+}
+
 (async function boot() {
   const id = getId();
   if (!id) {
@@ -69,47 +122,7 @@ function render(meal) {
   try {
     const meal = await fetchMealById(id);
     render(meal);
-
-    const { meta, embs, dim } = await loadEmbeddings();
-    const mealIndex = meta.findIndex(m => m.recipe_id === id);
-    if (mealIndex === -1) {
-      // Recipe not in our chunks, so we can't find related.
-      return;
-    }
-    const start = mealIndex * dim;
-    const queryEmbedding = embs.subarray(start, start + dim);
-    const similar = await findSimilar(queryEmbedding, 10, meta, embs, dim); 
-
-    const relatedContainer = document.getElementById('related-recipes');
-    if (similar && similar.length > 0) {
-      const uniqueRecipes = similar
-        .filter(s => s.chunk.recipe_id !== id) 
-        .reduce((acc, s) => {
-          if (!acc.some(item => item.chunk.recipe_id === s.chunk.recipe_id)) {
-            acc.push(s);
-          }
-          return acc;
-        }, [])
-        .slice(0, 3);
-
-      const recipeCards = await Promise.all(uniqueRecipes.map(async s => {
-        const relatedMeal = await fetchMealById(s.chunk.recipe_id);
-        const mealId = relatedMeal.idMeal;
-        const mealName = relatedMeal.strMeal;
-        const thumb = relatedMeal.strMealThumb;
-        return `
-        <div class="card">
-          <a href="recipe.html?id=${mealId}">
-            <img src="${thumb}" alt="${mealName}" loading="lazy">
-            <div class="card-content">
-              <h3>${mealName}</h3>
-            </div>
-          </a>
-        </div>
-      `}));
-      
-      relatedContainer.innerHTML = `<h2>Related Recipes</h2><div class="grid">${recipeCards.join('')}</div>`;
-    }
+    await showRelatedRecipes(id);
   } catch (e) {
     document.querySelector("#content").innerHTML = `<p>Failed to load recipe. ${e.message}</p>`;
   }
